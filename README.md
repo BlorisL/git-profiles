@@ -120,8 +120,9 @@ devcontainer belongs in its own container, with its toolchain and services. `ope
 picks the right place and, run from a VS Code terminal or task, opens the new window itself through VS Code's `code`
 command; from anywhere else it prints a `vscode://` link to click:
 
-- **it has a devcontainer** (`.devcontainer/devcontainer.json`): the folder opens on the host (through WSL on
-  Windows), and VS Code offers **Reopen in Container**;
+- **it has a devcontainer** (`.devcontainer/devcontainer.json`): on Linux the window opens straight in that
+  container, at its `workspaceFolder`; on Windows the folder opens through WSL, and VS Code offers **Reopen in
+  Container**;
 - **it has none**: the window attaches to this running container, where git already uses the profile. An attached
   window reads no `devcontainer.json`, so it never offers to rebuild the container git-profiles runs in. The
   container gets a stable name for this, `<checkout folder>-dev` (`.devcontainer/initialize.sh`).

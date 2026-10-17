@@ -333,22 +333,28 @@ class Cli extends CliAbstract {
             // where git already uses the profiles: attached, the window reads no devcontainer.json, so it never offers
             // to rebuild the container git-profiles runs in.
             const attached = !repository.hasDevcontainer() && container !== undefined && container !== "";
-            const target = attached ? { container: container!, path: repository.getPath() } : host;
+            // Off WSL, from this container, a host folder has no remote authority of its own: a `file://` URI would
+            // name a folder of the container ("Workspace does not exist"). A repository with its own devcontainer
+            // then opens straight in it, through the dev-container authority; on WSL `wsl+<distro>` reaches the host
+            // folder, and VS Code offers its container there.
+            const direct =
+                repository.hasDevcontainer() && this.layout.isInContainer() && this.layout.getDistro() === undefined;
             let where = "on the host";
-            if (repository.hasDevcontainer()) {
+            let uri = Editor.folderUri(host);
+            if (direct) {
+                where = "in its own devcontainer";
+                uri = Editor.devcontainerUri({ hostPath: host.hostPath, workspace: repository.getWorkspace()! });
+            } else if (repository.hasDevcontainer()) {
                 where = 'on the host, then choose "Reopen in Container"';
             } else if (attached) {
                 where = "of this container";
+                uri = Editor.folderUri({ container: container!, path: repository.getPath() });
             }
             // In a VS Code terminal (tasks included) `code` reaches the window and opens the folder without a click;
-            // anywhere else, or if it fails, the link is printed to click. From a terminal of this container `code`
-            // reads a `file://` URI as a folder of the container, where the host's path does not exist (VS Code said
-            // "Workspace does not exist"): a host folder off WSL gets the link, which the host's VS Code opens.
-            const reachable = attached || !this.layout.isInContainer() || this.layout.getDistro() !== undefined;
+            // anywhere else, or if it fails, the link is printed to click.
             const opened =
                 this.env[Cli.VSCODE_CLI_VARIABLE] !== undefined &&
-                reachable &&
-                this.interactive("code", ["--new-window", "--folder-uri", Editor.folderUri(target)], {}) === 0;
+                this.interactive("code", ["--new-window", "--folder-uri", uri], {}) === 0;
             if (opened) {
                 this.out(`Opening ${id} in a new VS Code window ${where}.`);
             } else {

@@ -35,6 +35,15 @@ describe("Editor.attachUri", () => {
     });
 });
 
+describe("Editor.devcontainerUri", () => {
+    it("names the host folder in hex and ends with the folder the devcontainer opens", () => {
+        strictEqual(
+            Editor.devcontainerUri({ hostPath: "/home/me/game", workspace: "/workspace" }),
+            `vscode-remote://dev-container+${Buffer.from("/home/me/game").toString("hex")}/workspace`
+        );
+    });
+});
+
 describe("Editor.folderUri", () => {
     it("a folder of this container is an attached-container URI, for code --folder-uri", () => {
         strictEqual(

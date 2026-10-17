@@ -44,6 +44,16 @@ abstract class EditorAbstract {
      * @param target - a folder of a container (`container` and `path`) or of the host (`hostPath`, `distro`)
      */
     public static folderUri: (target: { container: string; path: string } | EditorType) => string;
+
+    /**
+     * The remote folder URI that opens a host folder straight in its own devcontainer, for `code --folder-uri`:
+     * `vscode-remote://dev-container+<hex of the host path><workspace>`. From a terminal of this container a
+     * `file://` URI names a folder of the container, where the host's path does not exist ("Workspace does not
+     * exist"); the dev-container authority is resolved by the Dev Containers extension on the host, which builds or
+     * starts that container and opens its workspace, with no "Reopen in Container" to click.
+     * @param target - the folder as the host sees it, and the folder its devcontainer opens
+     */
+    public static devcontainerUri: (target: { hostPath: string; workspace: string }) => string;
 }
 
 export { EditorAbstract, type EditorType };

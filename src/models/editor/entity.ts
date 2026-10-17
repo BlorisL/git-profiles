@@ -26,6 +26,10 @@ class Editor extends EditorAbstract {
         return result;
     }
 
+    public static override devcontainerUri(target: { hostPath: string; workspace: string }): string {
+        return `vscode-remote://dev-container+${Buffer.from(target.hostPath, "utf8").toString("hex")}${encodeURI(target.workspace)}`;
+    }
+
     /**
      * How the attached-container authority names a container: the hex of `{"containerName":"/<name>"}`.
      * @param container - the container's name

@@ -36,3 +36,29 @@ describe("Repository.list", () => {
         );
     });
 });
+
+describe("Repository.workspaceOf", () => {
+    const dir = mkdtempSync(join(tmpdir(), "git-profiles-workspace-"));
+    after(() => rmSync(dir, { recursive: true, force: true }));
+
+    it("reads workspaceFolder through comments and trailing commas, keeping // inside strings", () => {
+        mkdirSync(join(dir, "mc", ".devcontainer"), { recursive: true });
+        writeFileSync(
+            join(dir, "mc", ".devcontainer", "devcontainer.json"),
+            '{\n  // the service\n  "image": "http://x/y", /* inline */\n  "workspaceFolder": "/workspace",\n}\n'
+        );
+        strictEqual(Repository.workspaceOf(join(dir, "mc"), "mc"), "/workspace");
+    });
+
+    it("replaces the basename variable, and without workspaceFolder takes /workspaces/<name> as VS Code does", () => {
+        mkdirSync(join(dir, "a"));
+        writeFileSync(
+            join(dir, "a", ".devcontainer.json"),
+            '{"workspaceFolder": "/w/${localWorkspaceFolderBasename}"}'
+        );
+        mkdirSync(join(dir, "b"));
+        writeFileSync(join(dir, "b", ".devcontainer.json"), "{}");
+        strictEqual(Repository.workspaceOf(join(dir, "a"), "a"), "/w/a");
+        strictEqual(Repository.workspaceOf(join(dir, "b"), "b"), "/workspaces/b");
+    });
+});

@@ -266,12 +266,13 @@ describe("Cli open from a VS Code terminal", () => {
         );
     });
 
-    it("a repository with its own devcontainer off WSL gets the link: code would look for the host's path here", () => {
+    it("a repository with its own devcontainer off WSL opens straight in it: file:// would name a folder here", () => {
         cloned("work", "game", true);
         const env = { GIT_PROFILES_CONTAINER: "git-profiles-dev", VSCODE_IPC_HOOK_CLI: "/tmp/x" };
         cli({ env, distro: null }).run(["open", "work/game"]);
-        strictEqual(sandbox.calls.length, 0);
-        strictEqual(sandbox.out.at(-1), "vscode://file/host/gp/local/profiles/work/repositories/game?windowId=_blank");
+        const hex = Buffer.from("/host/gp/local/profiles/work/repositories/game").toString("hex");
+        strictEqual(sandbox.calls[0]!.args[2], `vscode-remote://dev-container+${hex}/workspaces/game`);
+        strictEqual(sandbox.out.at(-1), "Opening work/game in a new VS Code window in its own devcontainer.");
     });
 
     it("when code fails, prints the link to click", () => {

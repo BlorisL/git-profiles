@@ -12,6 +12,8 @@ interface RepositoryType {
     path: string;
     /** Whether it has its own devcontainer, and so is meant to be opened in its own container. */
     devcontainer: boolean;
+    /** The folder its devcontainer opens (`workspaceFolder`), when it has one. */
+    workspace?: string;
 }
 
 abstract class RepositoryAbstract {
@@ -35,6 +37,15 @@ abstract class RepositoryAbstract {
      */
     public static list: (profile: string, dir: string) => RepositoryType[];
 
+    /**
+     * The folder a repository's devcontainer opens: its `workspaceFolder`, with `${localWorkspaceFolderBasename}`
+     * replaced, or `/workspaces/<name>`, the one VS Code picks when the file does not say. devcontainer.json is JSONC:
+     * comments and trailing commas are dropped before parsing, outside strings only, since a URL holds "//".
+     * @param path - the repository folder
+     * @param name - its folder name
+     */
+    public static workspaceOf: (path: string, name: string) => string;
+
     /** The profile it was cloned with. */
     public abstract getProfile(): RepositoryType["profile"];
 
@@ -46,6 +57,9 @@ abstract class RepositoryAbstract {
 
     /** Whether it has its own devcontainer. */
     public abstract hasDevcontainer(): RepositoryType["devcontainer"];
+
+    /** The folder its devcontainer opens, when it has one. */
+    public abstract getWorkspace(): RepositoryType["workspace"];
 
     /** `<profile>/<name>`: how the commands and the task menus name it. */
     public abstract getId(): string;
