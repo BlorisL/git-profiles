@@ -1,0 +1,10 @@
+#!/bin/sh
+# The key guard runs first and needs only git, so it protects a commit made from the host too.
+sh scripts/guard-local.sh || exit 1
+
+# Node exists in the toolchain container: from the host the lint goes through scripts/run.sh.
+if command -v npx >/dev/null 2>&1; then
+    npx lint-staged
+else
+    bash scripts/run.sh npx lint-staged
+fi

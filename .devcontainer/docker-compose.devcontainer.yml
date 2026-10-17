@@ -1,0 +1,9 @@
+# Only for the devcontainer: the service "dev" without "build", so the Dev Containers extension uses the image
+# initialize.sh has just built (git-profiles-dev:local) instead of building it itself.
+#
+# Building it, the extension writes a Dockerfile of its own in /tmp and hands it to docker compose, which builds with
+# buildx bake: bake reads no Dockerfile outside the build folder without an explicit permission, and "Rebuild Container"
+# failed with "additional privileges requested: pass --allow=fs.read=...". The same fix as in the game repository.
+services:
+    dev:
+        build: !reset null

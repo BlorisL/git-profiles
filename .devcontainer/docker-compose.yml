@@ -1,0 +1,46 @@
+# The toolchain container. Relative paths on purpose: on WSL the Dev Containers extension reports the folder as a
+# Windows UNC path (\\wsl.localhost\...), and a bind mount written from ${localWorkspaceFolder} would not resolve.
+services:
+    dev:
+        # node:24-trixie with the Claude Code and Codex CLIs (Dockerfile). initialize.sh builds it before every start,
+        # and the devcontainer uses it as built (docker-compose.devcontainer.yml says why).
+        build: .
+        image: git-profiles-dev:local
+        # From .devcontainer/.env, written by initialize.sh: `open` attaches new windows to this container by name.
+        container_name: ${GIT_PROFILES_CONTAINER}
+        user: node
+        command: ["sleep", "infinity"]
+        environment:
+            # Every git in the container (terminals, the Git panel of VS Code, tasks, docker exec) loads the
+            # generated config, which gives each profile's repositories its key, identity and signing. A variable
+            # and not a line in ~/.gitconfig: nothing is written to any home, and a missing file is skipped.
+            GIT_CONFIG_COUNT: "1"
+            GIT_CONFIG_KEY_0: include.path
+            GIT_CONFIG_VALUE_0: /workspaces/git-profiles/local/git.config
+            # Bash shows only the last two folders of the working directory in the prompt: a repository opened from a
+            # profile lives deep in local/profiles/<profile>/repositories/, and the full path filled the line.
+            PROMPT_DIRTRIM: "2"
+            # The container's own name, for the attach links of `open`.
+            GIT_PROFILES_CONTAINER: ${GIT_PROFILES_CONTAINER}
+            # Claude Code keeps its login in two places, ~/.claude/.credentials.json and ~/.claude.json, the second
+            # OUTSIDE the folder: with the folder alone kept across rebuilds, every new container looked like a new
+            # install and asked for the login again. CLAUDE_CONFIG_DIR moves both into the kept folder. The file itself
+            # is not mounted: a single-file bind mount breaks at the first write, because the writer renames a
+            # temporary file over it and the mount keeps the old inode.
+            CLAUDE_CONFIG_DIR: /home/node/.claude
+        volumes:
+            # This repository.
+            - ..:/workspaces/git-profiles
+            # The keys of whoever works here (secrets/, outside git), as in every project of the same author: ssh for
+            # pull and push (scripts/setup-keys.sh), GPG to sign the commits (scripts/setup-gpg.sh).
+            - ../secrets/ssh:/home/node/.ssh
+            - ../secrets/gpg:/home/node/.devcontainer-gpg:ro
+            # VS Code Server and its extensions' storage, kept across rebuilds: extensions are not downloaded again,
+            # and Intelephense finds its index instead of rebuilding it at every opening (local/, outside git).
+            - ../local/vscode-server:/home/node/.vscode-server
+            # The container's own Claude Code login and settings, kept across rebuilds (local/, outside git). Never the
+            # host's ~/.claude: the container mounts nothing of the host but this repository.
+            - ../local/claude:/home/node/.claude
+            # The same for Codex, CLI and VS Code extension alike: its login (auth.json) and settings (config.toml) all
+            # live in ~/.codex, so the folder alone is enough. Never the host's ~/.codex, as for Claude Code.
+            - ../local/codex:/home/node/.codex

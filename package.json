@@ -1,0 +1,60 @@
+{
+    "name": "git-profiles",
+    "version": "0.1.0",
+    "description": "A container that holds your git accounts: ssh keys, identities and signing per profile, and the repositories cloned with each, without touching the host.",
+    "license": "MIT",
+    "author": "Loris Salvi",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/BlorisL/git-profiles.git"
+    },
+    "private": true,
+    "type": "module",
+    "//": "TypeScript runs directly on Node 24 (type stripping): no build and no runtime dependencies. The devDependencies only check types, lint and format.",
+    "imports": {
+        "#agentFiles": "./src/models/agentFiles/index.ts",
+        "#catalog": "./src/models/catalog/index.ts",
+        "#cli": "./src/models/cli/index.ts",
+        "#editor": "./src/models/editor/index.ts",
+        "#gitConfig": "./src/models/gitConfig/index.ts",
+        "#jsonObject": "./src/models/jsonObject/index.ts",
+        "#layout": "./src/models/layout/index.ts",
+        "#probe": "./src/models/probe/index.ts",
+        "#profile": "./src/models/profile/index.ts",
+        "#repository": "./src/models/repository/index.ts"
+    },
+    "scripts": {
+        "gp": "node src/cli.ts",
+        "test": "node --test \"src/**/test.ts\"",
+        "typecheck": "tsc -p tsconfig.json",
+        "style:dry": "eslint . && prettier --check .",
+        "style:apply": "eslint . --fix && prettier --write .",
+        "check": "npm run typecheck && npm run style:dry && npm test",
+        "prepare": "husky"
+    },
+    "engines": {
+        "node": ">=24.0.0"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^21.0.2",
+        "@commitlint/config-conventional": "^21.0.2",
+        "@eslint/js": "^10.0.1",
+        "@stylistic/eslint-plugin": "^5.10.0",
+        "@types/node": "^24.0.0",
+        "eslint": "^10.5.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^17.0.7",
+        "prettier": "^3.8.4",
+        "typescript": "~6.0.0",
+        "typescript-eslint": "^8.61.1"
+    },
+    "lint-staged": {
+        "*.{ts,js,mjs,cjs}": [
+            "eslint --fix",
+            "prettier --write"
+        ],
+        "*.{json,md,yml,yaml}": [
+            "prettier --write"
+        ]
+    }
+}

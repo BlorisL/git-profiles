@@ -1,0 +1,8 @@
+#!/bin/sh
+# Conventional commits (commitlint.config.cjs). From the host it goes through the toolchain container, where $1 (a
+# path relative to the repository root) resolves the same way.
+if command -v npx >/dev/null 2>&1; then
+    npx commitlint --edit "$1"
+else
+    bash scripts/run.sh npx commitlint --edit "$1"
+fi

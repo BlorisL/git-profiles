@@ -1,0 +1,22 @@
+node_modules/
+
+# Profiles, their keys, the repositories cloned with them and everything generated from them belong to the machine,
+# never to this repository. Only local/profiles/.gitkeep is tracked, so the folder exists right after a clone. The
+# pre-commit hook (scripts/guard-local.sh) refuses anything else under local/ even if forced with `git add -f`.
+local/*
+!local/profiles/
+local/profiles/*
+!local/profiles/.gitkeep
+
+# Written by .devcontainer/initialize.sh on the host before every start: the container's name.
+.devcontainer/.env
+
+# The keys of whoever works on this repository, as in every project of the same author: ssh for pull and push
+# (scripts/setup-keys.sh), GPG to sign the commits (scripts/setup-gpg.sh), npm for private packages (none here yet,
+# kept for the same layout everywhere). Mounted by the devcontainer, never in git.
+secrets/ssh/*
+secrets/gpg/*
+secrets/npm/*
+!secrets/ssh/.gitkeep
+!secrets/gpg/.gitkeep
+!secrets/npm/.gitkeep

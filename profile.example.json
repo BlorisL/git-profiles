@@ -1,0 +1,9 @@
+{
+    "//": "Copy into local/profiles/<name>/profile.json (or run 🔐 Profiles → Create). Only identity is required; remove the fields you do not need, and this line. The ssh key goes in local/profiles/<name>/secrets/ssh/ as id and id.pub.",
+    "identity": { "name": "Ada Lovelace", "email": "ada@example.com" },
+    "key": "id",
+    "signing": { "format": "ssh", "key": "id.pub" },
+    "host": "github.com",
+    "port": 22,
+    "user": "git"
+}

@@ -1,0 +1,206 @@
+// The VS Code tasks of this repository: one per section, and the action is picked from the menu the task opens (a
+// pickString input whose value is the command). The task runs it with eval, and the value arrives in double quotes
+// (quoting weak): that is why a menu value never contains $, `, \ or ". What a command needs beyond its menu (a
+// profile, a URL, a repository) it asks in the terminal, so no menu depends on the machine and this file is written
+// by hand. Every command goes through scripts/run.sh, which runs it in the devcontainer even with VS Code open on the
+// host. The common sections (Checks, Devcontainer) are last, as in every project of the same author; the hidden task
+// asks for the GPG passphrases when the folder opens.
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🔐 Profiles",
+            "type": "shell",
+            "command": "eval",
+            "args": [
+                {
+                    "value": "${input:profiles}",
+                    "quoting": "weak"
+                }
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true
+            },
+            "detail": "Create a profile step by step, generate the git config of the profiles in local/profiles, list them with their repositories, or check their keys and remotes."
+        },
+        {
+            "label": "📂 Repositories",
+            "type": "shell",
+            "command": "eval",
+            "args": [
+                {
+                    "value": "${input:repositories}",
+                    "quoting": "weak"
+                }
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true
+            },
+            "detail": "The repositories cloned with the profiles: open one in a new VS Code window (in its own devcontainer when it has one), clone a new one with a profile, or list them. Profile, URL and repository are asked in the terminal."
+        },
+        {
+            "label": "🧪 Checks",
+            "type": "shell",
+            "command": "eval",
+            "args": [
+                {
+                    "value": "${input:checks}",
+                    "quoting": "weak"
+                }
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "detail": "Typecheck, lint, format and tests: All is what the CI runs."
+        },
+        {
+            "label": "🐳 Devcontainer",
+            "type": "shell",
+            "command": "eval",
+            "args": [
+                {
+                    "value": "${input:devcontainer}",
+                    "quoting": "weak"
+                }
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true,
+                "focus": true
+            },
+            "detail": "What prepares the container: dependencies, the ssh key of secrets/ssh, GPG signing."
+        },
+        {
+            "label": "🔑 GPG signing: unlock on open",
+            "type": "shell",
+            "command": "bash scripts/setup-gpg.sh",
+            "runOptions": {
+                "runOn": "folderOpen"
+            },
+            "hide": true,
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "close": true
+            },
+            "detail": "The passphrases of the keys in secrets/gpg and in the profiles, asked only when the container's agent does not have them yet."
+        }
+    ],
+    "inputs": [
+        {
+            "id": "profiles",
+            "type": "pickString",
+            "description": "Profiles: what to do",
+            "options": [
+                {
+                    "label": "List: the profiles and their repositories",
+                    "value": "bash scripts/run.sh node src/cli.ts list"
+                },
+                {
+                    "label": "Create: a new profile, step by step in the terminal (from the key the account already has, or a new one)",
+                    "value": "bash scripts/run.sh node src/cli.ts init"
+                },
+                {
+                    "label": "Apply: generate the git config after adding or editing a profile",
+                    "value": "bash scripts/run.sh node src/cli.ts apply"
+                },
+                {
+                    "label": "Check: every profile's key against its server, and every repository's remote",
+                    "value": "bash scripts/run.sh node src/cli.ts check"
+                }
+            ],
+            "default": "bash scripts/run.sh node src/cli.ts list"
+        },
+        {
+            "id": "repositories",
+            "type": "pickString",
+            "description": "Repositories: what to do",
+            "options": [
+                {
+                    "label": "Open: a repository in a new VS Code window (asks which)",
+                    "value": "bash scripts/run.sh node src/cli.ts open"
+                },
+                {
+                    "label": "Clone: a repository with a profile, into its repositories/ folder (asks profile and URL)",
+                    "value": "bash scripts/run.sh node src/cli.ts clone"
+                },
+                {
+                    "label": "List: the profiles and their repositories",
+                    "value": "bash scripts/run.sh node src/cli.ts list"
+                }
+            ],
+            "default": "bash scripts/run.sh node src/cli.ts open"
+        },
+        {
+            "id": "checks",
+            "type": "pickString",
+            "description": "Checks: what to verify",
+            "options": [
+                {
+                    "label": "All: typecheck, lint, format and tests, like the CI",
+                    "value": "bash scripts/run.sh npm run check"
+                },
+                {
+                    "label": "Typecheck: tsc, no output",
+                    "value": "bash scripts/run.sh npm run typecheck"
+                },
+                {
+                    "label": "Style: eslint and prettier, read-only",
+                    "value": "bash scripts/run.sh npm run style:dry"
+                },
+                {
+                    "label": "Style fix: eslint --fix and prettier --write",
+                    "value": "bash scripts/run.sh npm run style:apply"
+                },
+                {
+                    "label": "Tests: node --test on every test.ts",
+                    "value": "bash scripts/run.sh npm test"
+                }
+            ],
+            "default": "bash scripts/run.sh npm run check"
+        },
+        {
+            "id": "devcontainer",
+            "type": "pickString",
+            "description": "Devcontainer: what to prepare",
+            "options": [
+                {
+                    "label": "Dependencies: npm install",
+                    "value": "bash scripts/run.sh npm install"
+                },
+                {
+                    "label": "SSH key: pull and push (the post-create already runs it)",
+                    "value": "bash scripts/setup-keys.sh"
+                },
+                {
+                    "label": "Agent skills: install or update agent-standard in Claude Code and Codex (the post-create already runs it)",
+                    "value": "bash scripts/setup-agents.sh"
+                },
+                {
+                    "label": "GPG signing: unlock (asks the passphrase of the key in secrets/gpg and of the profiles' keys, once per start)",
+                    "value": "bash scripts/setup-gpg.sh"
+                }
+            ],
+            "default": "bash scripts/run.sh npm install"
+        }
+    ]
+}

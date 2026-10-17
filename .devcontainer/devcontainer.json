@@ -1,0 +1,32 @@
+{
+    "name": "git-profiles",
+    "dockerComposeFile": ["docker-compose.yml", "docker-compose.devcontainer.yml"],
+    "service": "dev",
+    "workspaceFolder": "/workspaces/git-profiles",
+    // `open` gives VS Code on the host a link to a repository, so the tool is told where the checkout is on the host
+    // and in which WSL distribution. On WSL the folder may arrive as a UNC path, which names the distribution too.
+    "containerEnv": {
+        "GIT_PROFILES_HOST_ROOT": "${localWorkspaceFolder}",
+        "WSL_DISTRO_NAME": "${localEnv:WSL_DISTRO_NAME}"
+    },
+    // On the host, before every start and rebuild: the folders of local/ that the compose file mounts (initialize.sh).
+    "initializeCommand": "bash ${localWorkspaceFolder}/.devcontainer/initialize.sh",
+    "postCreateCommand": "bash scripts/post-create.sh",
+    "remoteUser": "node",
+    "customizations": {
+        "vscode": {
+            // Installed into the container at its creation, kept by the local/vscode-server mount. Vue and PHP are for
+            // the repositories opened in this container's windows. The Dev Containers extension itself runs on the
+            // host's VS Code (where "Reopen in Container" happens), so in here there is Container Tools.
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "Vue.volar",
+                "anthropic.claude-code",
+                "openai.chatgpt",
+                "ms-azuretools.vscode-containers",
+                "bmewburn.vscode-intelephense-client"
+            ]
+        }
+    }
+}
