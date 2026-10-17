@@ -23,7 +23,7 @@ if [ ! -f /.dockerenv ]; then
     exec bash "$ROOT_DIR/scripts/run.sh" bash scripts/setup-agents.sh "$@"
 fi
 
-URL="${AGENT_STANDARD_URL:-git@github-loris:BlorisL/agent-standard.git}"
+URL="${AGENT_STANDARD_URL:-git@github.com:BlorisL/agent-standard.git}"
 MARKETPLACE="agent-standard"
 PLUGIN="standard@$MARKETPLACE"
 CHECKOUT="$HOME/.local/share/agent-standard"
