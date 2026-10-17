@@ -42,6 +42,7 @@ function cli(
         interactive?: (command: string, args: string[]) => number;
         answers?: (string | undefined)[];
         output?: string;
+        distro?: string | null;
     } = {}
 ): Cli {
     return new Cli({
@@ -50,7 +51,7 @@ function cli(
                 repository: sandbox.repository,
                 hostRepository: "/host/gp",
                 inContainer: options.inContainer ?? true,
-                distro: "Debian",
+                distro: options.distro === null ? undefined : (options.distro ?? "Debian"),
             })
         ),
         run: (command, args, env): { status: number; output: string } => {
@@ -263,6 +264,14 @@ describe("Cli open from a VS Code terminal", () => {
             sandbox.calls[0]!.args[2],
             "vscode-remote://wsl+Debian/host/gp/local/profiles/work/repositories/game"
         );
+    });
+
+    it("a repository with its own devcontainer off WSL gets the link: code would look for the host's path here", () => {
+        cloned("work", "game", true);
+        const env = { GIT_PROFILES_CONTAINER: "git-profiles-dev", VSCODE_IPC_HOOK_CLI: "/tmp/x" };
+        cli({ env, distro: null }).run(["open", "work/game"]);
+        strictEqual(sandbox.calls.length, 0);
+        strictEqual(sandbox.out.at(-1), "vscode://file/host/gp/local/profiles/work/repositories/game?windowId=_blank");
     });
 
     it("when code fails, prints the link to click", () => {

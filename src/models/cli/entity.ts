@@ -341,9 +341,13 @@ class Cli extends CliAbstract {
                 where = "of this container";
             }
             // In a VS Code terminal (tasks included) `code` reaches the window and opens the folder without a click;
-            // anywhere else, or if it fails, the link is printed to click.
+            // anywhere else, or if it fails, the link is printed to click. From a terminal of this container `code`
+            // reads a `file://` URI as a folder of the container, where the host's path does not exist (VS Code said
+            // "Workspace does not exist"): a host folder off WSL gets the link, which the host's VS Code opens.
+            const reachable = attached || !this.layout.isInContainer() || this.layout.getDistro() !== undefined;
             const opened =
                 this.env[Cli.VSCODE_CLI_VARIABLE] !== undefined &&
+                reachable &&
                 this.interactive("code", ["--new-window", "--folder-uri", Editor.folderUri(target)], {}) === 0;
             if (opened) {
                 this.out(`Opening ${id} in a new VS Code window ${where}.`);
