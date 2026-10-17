@@ -3,9 +3,9 @@
 # .devcontainer/docker-compose.yml mounts it in ~/.ssh. post-create.sh runs it at every creation of the devcontainer,
 # and it can be run again by hand: it asks nothing.
 #
-# It needs secrets/ssh/sign and sign.pub: the key GitHub recognizes the pusher by. The ssh host is the one of the
-# remote (origin = "<alias>:<user>/<repo>"), so the name lives in one place only: the script writes its block in
-# ~/.ssh/config.d/, pointing to github.com with the key of secrets/ssh.
+# It needs secrets/ssh/id and id.pub: the key GitHub recognizes the pusher by. The ssh host is the one of the
+# remote (origin = "git@github.com:<user>/<repo>" or "<alias>:<user>/<repo>"), so the name lives in one place only:
+# the script writes its block in ~/.ssh/config.d/, pointing to github.com with the key of secrets/ssh.
 #
 # This is the container's own access to this repository, as in every project of the same author. The profiles in
 # local/ are what the tool generates for the host, and the container does not use them for its own git.
@@ -17,16 +17,19 @@ if [ ! -f /.dockerenv ]; then
 fi
 cd "$ROOT_DIR"
 
-SSH_PRIV="$HOME/.ssh/sign"
-SSH_PUB="$HOME/.ssh/sign.pub"
+SSH_PRIV="$HOME/.ssh/id"
+SSH_PUB="$HOME/.ssh/id.pub"
 
 REMOTE="$(git remote get-url origin)"
+# "git@github.com:..." gives "github.com": ssh matches a Host block on the host name, never on "user@host", so a
+# block named "git@github.com" would never be used and ssh would not try the key, which is not named id_*.
 SSH_ALIAS="${REMOTE%%:*}"
+SSH_ALIAS="${SSH_ALIAS#*@}"
 
 echo "=== ssh: $SSH_ALIAS ==="
 for file in "$SSH_PRIV" "$SSH_PUB"; do
     if [ ! -f "$file" ]; then
-        echo "$file is missing: put the ssh key in secrets/ssh/ (sign and sign.pub)." >&2
+        echo "$file is missing: put the ssh key in secrets/ssh/ (id and id.pub)." >&2
         exit 1
     fi
 done

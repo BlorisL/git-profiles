@@ -195,7 +195,7 @@ in `secrets/` (ignored by git and refused by the same guard), as in every projec
 
 ```
 secrets/
-    ssh/   sign, sign.pub                    pull and push (scripts/setup-keys.sh, run by the post-create)
+    ssh/   id, id.pub                        pull and push (scripts/setup-keys.sh, run by the post-create)
     gpg/   private-key.gpg, public-key.gpg   the key that signs the commits (scripts/setup-gpg.sh)
 ```
 
