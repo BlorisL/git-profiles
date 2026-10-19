@@ -16,6 +16,8 @@ bash "$ROOT/scripts/setup-keys.sh" || echo "ssh key not configured: see scripts/
 # The skills of agent-standard for Claude Code and Codex, through the ssh key: without it the container opens anyway,
 # and running the script again installs them.
 bash "$ROOT/scripts/setup-agents.sh" || echo "Skills not installed: see scripts/setup-agents.sh."
+# Caveman is public and can install even when the private agent-standard repository is not reachable yet.
+bash "$ROOT/scripts/setup-caveman.sh" || echo "Caveman not installed: see scripts/setup-caveman.sh."
 # Without profiles in local/profiles the container opens anyway: add them and run `npm run gp -- apply`. GPG signing
 # is not prepared here: it needs the passphrases, so the task that runs when the folder opens asks for them.
 (cd "$ROOT" && node src/cli.ts apply) || echo "Profiles not applied: see the README, then run npm run gp -- apply."

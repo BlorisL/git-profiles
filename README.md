@@ -155,12 +155,22 @@ Besides this repository, the container mounts:
 - `local/codex` as `~/.codex`: the same for Codex, its login and settings.
 
 `.devcontainer/initialize.sh` creates these folders on the host before every start, owned by you rather than by root.
-The image (`.devcontainer/Dockerfile`) adds the `claude` and `codex` CLIs for the terminal from their npm packages,
-installed as `node` (nothing in the container runs as root), sharing their logins with the VS Code extensions. At
+The image (`.devcontainer/Dockerfile`) installs the Linux sandbox dependencies `bubblewrap` and `socat` as root
+during the build. It adds the `claude` and `codex` terminal CLIs from their npm packages as `node`, the user that
+runs the container, sharing their logins with the VS Code extensions. At
 every creation the post-create installs the author's common skills (`BlorisL/agent-standard`, private, reached with
 the ssh key) into both (`scripts/setup-agents.sh`): the plugin `standard`, from the same marketplace, so its skills
 are `standard:<name>` in both; for Codex also the hook in `~/.codex/hooks.json` (approve it once with `/hooks`) and
-the session model in `~/.codex/config.toml` if it names none. Run it again to get a newer push. The extensions installed in the container are ESLint, Prettier, Vue,
+the session model in `~/.codex/config.toml` if it names none. Existing hooks are preserved when adding model-routing.
+The post-create also runs `scripts/setup-caveman.sh`, independently of the private repository: Caveman v4.0.1
+installs its Codex skills and a `SessionStart` hook
+for automatic activation, plus the Claude Code plugin unless it is already installed or synced from the account.
+In Codex, approve the Caveman hook once with `/hooks` and start a new session. Its files under `~/.codex` survive
+rebuilds; setup recreates user skills in the container's home when needed. New sessions use Caveman by default;
+a project's `.caveman.json` with `{"defaultMode":"off"}` disables it there, and `$caveman` invokes the skill manually.
+Run `bash scripts/setup-agents.sh` again to refresh `standard`, and `bash scripts/setup-caveman.sh` to restore
+Caveman. These commands target the container, including when launched
+from the host. The extensions installed in the container are ESLint, Prettier, Vue,
 Claude Code, Codex, Container Tools and PHP Intelephense; the Dev Containers extension itself runs in the host's VS
 Code.
 

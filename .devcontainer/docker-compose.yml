@@ -2,6 +2,8 @@
 # Windows UNC path (\\wsl.localhost\...), and a bind mount written from ${localWorkspaceFolder} would not resolve.
 services:
     dev:
+        security_opt:
+            - seccomp=unconfined
         # node:24-trixie with the Claude Code and Codex CLIs (Dockerfile). initialize.sh builds it before every start,
         # and the devcontainer uses it as built (docker-compose.devcontainer.yml says why).
         build: .

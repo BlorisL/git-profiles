@@ -12,6 +12,7 @@
     // On the host, before every start and rebuild: the folders of local/ that the compose file mounts (initialize.sh).
     "initializeCommand": "bash ${localWorkspaceFolder}/.devcontainer/initialize.sh",
     "postCreateCommand": "bash scripts/post-create.sh",
+    "postAttachCommand": "bash scripts/install-vscode-extensions.sh",
     "remoteUser": "node",
     "customizations": {
         "vscode": {

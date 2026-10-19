@@ -11,7 +11,7 @@
 #     ~/.codex/hooks.json, run from a checkout in ~/.local/share/agent-standard; and the session model it is
 #     written for goes in ~/.codex/config.toml. Both live in local/codex and survive rebuilds.
 #
-# Nothing of the user's own is overwritten: hooks.json is written only if missing or written by this script, and
+# Nothing of the user's own is overwritten: hooks.json is merged without removing other hooks, and
 # the session model only if config.toml names none.
 #
 # The repository is private: it is reached with the container's ssh key, through the alias setup-keys.sh writes.
@@ -61,22 +61,9 @@ else
 fi
 codex plugin add "$PLUGIN"
 
-# The hook runs from the checkout, which every run of this script brings up to date. Codex runs it only after the
-# user approves it once with /hooks.
-if [ ! -f "$HOOKS" ] || grep -q "agent-standard/hooks/model-routing.sh" "$HOOKS"; then
-    cat > "$HOOKS" << HOOKS_EOF
-{
-    "hooks": {
-        "UserPromptSubmit": [
-            { "hooks": [{ "type": "command", "command": "bash $CHECKOUT/hooks/model-routing.sh codex", "timeout": 5 }] }
-        ]
-    }
-}
-HOOKS_EOF
-    echo "hook in $HOOKS (approve it once in Codex with /hooks)"
-else
-    echo "$HOOKS has hooks of its own: add model-routing.sh by hand (see agent-standard/README.md)." >&2
-fi
+# Keep Caveman's SessionStart and user hooks when refreshing model-routing.
+node "$ROOT_DIR/scripts/setup-codex-hooks.ts" "$HOOKS" "$CHECKOUT"
+echo "hook in $HOOKS (approve it once in Codex with /hooks)"
 
 # The top-level keys of a TOML file must come before its first table, so they go at the top.
 if ! grep -q '^model *=' "$CONFIG" 2> /dev/null; then
