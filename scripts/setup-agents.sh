@@ -7,12 +7,12 @@
 #     repository opened in this container. Claude Code clones it into its own cache, in local/claude: it survives
 #     rebuilds, and this script only updates it.
 #   - Codex: the same plugin, from the same marketplace (Codex reads .claude-plugin/marketplace.json), so its skills
-#     are standard:<name> there too. Codex does not run a plugin's hooks, so model-routing's hook goes in
+#     are standard:<name> there too. model-routing is registered separately in
 #     ~/.codex/hooks.json, run from a checkout in ~/.local/share/agent-standard; and the session model it is
 #     written for goes in ~/.codex/config.toml. Both live in local/codex and survive rebuilds.
 #
 # Nothing of the user's own is overwritten: hooks.json is merged without removing other hooks, and
-# the session model only if config.toml names none.
+# Codex configuration gets defaults for missing settings.
 #
 # The repository is private: it is reached with the container's ssh key, through the alias setup-keys.sh writes.
 # AGENT_STANDARD_URL points elsewhere, e.g. a local checkout to try a change before pushing it.
@@ -30,6 +30,9 @@ CHECKOUT="$HOME/.local/share/agent-standard"
 CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
 HOOKS="$CODEX_DIR/hooks.json"
 CONFIG="$CODEX_DIR/config.toml"
+
+python3 "$ROOT_DIR/scripts/setup-codex-config.py" "$CONFIG"
+echo "Codex model and automatic compaction defaults in $CONFIG"
 
 echo "=== Claude Code: $PLUGIN ==="
 # By its name, the line "❯ <name>": the source line under it names the URL, which contains the name too.
@@ -64,12 +67,5 @@ codex plugin add "$PLUGIN"
 # Keep Caveman's SessionStart and user hooks when refreshing model-routing.
 node "$ROOT_DIR/scripts/setup-codex-hooks.ts" "$HOOKS" "$CHECKOUT"
 echo "hook in $HOOKS (approve it once in Codex with /hooks)"
-
-# The top-level keys of a TOML file must come before its first table, so they go at the top.
-if ! grep -q '^model *=' "$CONFIG" 2> /dev/null; then
-    { printf 'model = "gpt-6.1-sol"\nmodel_reasoning_effort = "medium"\n\n'; cat "$CONFIG" 2> /dev/null || true; } > "$CONFIG.tmp"
-    mv "$CONFIG.tmp" "$CONFIG"
-    echo "session model in $CONFIG: gpt-6.1-sol, medium"
-fi
 
 echo "Done."

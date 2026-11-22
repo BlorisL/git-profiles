@@ -5,7 +5,7 @@ FROM node:24-trixie
 # Claude Code usa bubblewrap per isolare il filesystem e socat per il proxy di rete del sandbox Linux.
 # Installarli nell'immagine evita il warning sulle dipendenze mancanti anche dopo la ricostruzione del container.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends bubblewrap socat \
+    && apt-get install -y --no-install-recommends bubblewrap socat python3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Solo i pacchetti di sistema vengono installati come root durante la build; le CLI npm e i comandi del container

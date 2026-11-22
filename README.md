@@ -161,7 +161,8 @@ runs the container, sharing their logins with the VS Code extensions. At
 every creation the post-create installs the author's common skills (`BlorisL/agent-standard`, private, reached with
 the ssh key) into both (`scripts/setup-agents.sh`): the plugin `standard`, from the same marketplace, so its skills
 are `standard:<name>` in both; for Codex also the hook in `~/.codex/hooks.json` (approve it once with `/hooks`) and
-the session model in `~/.codex/config.toml` if it names none. Existing hooks are preserved when adding model-routing.
+defaults for the session model and native automatic compaction in `~/.codex/config.toml`. The compaction threshold
+is 120,000 tokens for profiles without an explicit limit. Existing settings and hooks are preserved.
 The post-create also runs `scripts/setup-caveman.sh`, independently of the private repository: Caveman v4.0.1
 installs its Codex skills and a `SessionStart` hook
 for automatic activation, plus the Claude Code plugin unless it is already installed or synced from the account.

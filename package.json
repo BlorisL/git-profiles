@@ -29,7 +29,8 @@
         "typecheck": "tsc -p tsconfig.json",
         "style:dry": "eslint . && prettier --check .",
         "style:apply": "eslint . --fix && prettier --write .",
-        "check": "npm run typecheck && npm run style:dry && npm test",
+        "test:codex-config": "python3 scripts/setup-codex-config.test.py",
+        "check": "npm run typecheck && npm run style:dry && npm test && npm run test:codex-config",
         "prepare": "husky"
     },
     "engines": {
